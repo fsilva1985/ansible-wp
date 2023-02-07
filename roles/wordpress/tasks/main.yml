@@ -1,0 +1,42 @@
+---
+  - name: Instalacao nginx e php para o funcionamento do WP
+    apt:
+      pkg:
+      - nginx
+      - unzip
+      - php7.2-zip
+      - php-imagick
+      - php7.2-curl
+      - php7.2-fpm
+      - php7.2-mbstring
+      - php7.2-cli
+      - php7.2-bcmath
+      - php7.2-xml
+      - php7.2-mysql
+      - php7.2-common
+      - php7.2-gd
+      - php7.2-json
+      update_cache: yes
+  
+  - name: Configuracao do vhost nginx
+    template:
+      src: vhost.nginx.conf.j2
+      dest: /etc/nginx/sites-enabled/default 
+
+  - name: Baixando o projeto do wordpress e descompactando
+    ansible.builtin.unarchive:
+      src: https://github.com/WordPress/WordPress/archive/refs/tags/5.9.3.zip
+      dest: /var/www/html
+      remote_src: yes
+
+  - name: Alterando permissão da pasta /var/www/html/WordPress-5.9.3
+    ansible.builtin.file:
+      path: /var/www/html/WordPress-5.9.3
+      owner: www-data
+      group: www-data
+      mode: '0755' 
+
+  - name: restarted nginx
+    service:
+      name: nginx
+      state: restarted
